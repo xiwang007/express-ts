@@ -1,0 +1,39 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true
+    },
+    "extends": [
+        //"standard",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 12,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "rules": {
+        // 第一个参数:
+        //      "off"或0 -关闭规则
+        //      "warn"或1 - 开启规则, 使用警告 程序不会退出
+        //      "error"或2 - 开启规则, 使用错误 程序退出
+        // 第二个参数 
+        //      always（默认）：在语句末尾需要分号 
+        //      never ：不允许加分号
+        "semi": ["error", "never"],
+        "no-extra-semi": 2, //不允许出现不必要的分号
+        "quotes": ["error", "double"],
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-explicit-any": 1,
+        "@typescript-eslint/no-inferrable-types": [
+          "warn", {
+            "ignoreParameters": true
+          }
+        ],
+        "@typescript-eslint/no-unused-vars": "warn"
+    }
+}

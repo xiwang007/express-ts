@@ -1,0 +1,4 @@
+# token ----jsonwebtoken秘钥和公钥生成在Linux中
+# 到时需要自己再重新生成替换即可 目前我这边只用了无密码的对称加密
+ssh-keygen -t rsa -b 2048 -f private.key
+openssl rsa -in private.key -pubout -outform PEM -out public.key

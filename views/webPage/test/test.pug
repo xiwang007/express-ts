@@ -1,0 +1,66 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(http-equiv="X-UA-Compatible" content="IE=edge")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title= locals.title
+    link(rel="icon" href="favicon.ico")
+    link(rel="stylesheet" href="/css/styles.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css")
+  body.markdown-body
+    //- 这边用locals来区分传入的数据,传入的数据都会在局部变量locals上面
+    h1= locals.message
+    - for (var x = 0; x < 3; x++)
+        li item #{x}
+
+    script(src='/js/test.js')
+    script.
+      var usingPug=true;
+      if (usingPug){
+        console.log('这是明智的选择。')
+      }else{
+        console.log('请用 Pug。')
+      }
+
+    - var values = [];
+    ul
+        for val,index in values.length ? values : ['没有内容']
+            li= val + index
+            
+    //-
+      #{ 和 } 里面的代码也会被求值，转义，并最终嵌入到模板的渲染输出中。
+      里面可以是任何的正确的 JavaScript 表达式，您可以自由发挥。
+      注释说明 - 代表不会渲染到页面 如果不加则会把注释渲染上去
+    //
+      会渲染到页面的注释
+    - var mystr="<h1>test</h1>"
+    p.
+      #{mystr}
+    p.
+      !{mystr}
+    p.
+      使用带属性的嵌入标签的例子：
+      #[q(lang="es") ¡Hola Mundo!]
+    //- 混入 Mixin
+    mixin article(title)
+      .article
+        .article-wrapper
+          h1= title
+          if block
+            block
+          else
+            p 没有提供任何内容。
+
+    +article('Hello world')
+    +article('Hello world')
+      p 这是我
+      p 随便写的文章
+
+
+
+    h1 =======下面是 README.md 内容=======
+    p!=locals.result
+
+    include footer.pug
