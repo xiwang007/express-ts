@@ -38,6 +38,17 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
  * 注册静态文件
  */
 const init = (app) => {
+    // 打印 每个请求
+    app.use(function (req, res, next) {
+        // 127.0.0.1:8080  localhost:8080
+        // 这边可以根据请求的 host 处理
+        console.log(req.headers.host, req.method, req.url);
+        // 这边简单 把 127.0.0.1 给限制访问了 实际可以是线上服务器的IP
+        if (req.headers.host.indexOf("127.0.0.1") == 0 && req.url != "/404") {
+            return res.redirect("/404");
+        }
+        next();
+    });
     // 加载 token 所需要的公钥和私钥
     common.GetPrivate();
     common.GetPublic();
@@ -75,11 +86,6 @@ const init = (app) => {
     // 设置解析req的body
     app.use(express_1.default.urlencoded({ extended: false }));
     app.use(express_1.default.json());
-    // 打印 每个请求
-    app.use(function (req, res, next) {
-        console.log(req.method, req.url);
-        next();
-    });
     // 拦截访问less请求
     app.use(function (req, res, next) {
         const url = req.url.slice(0, req.url.indexOf("?") == -1 ? req.url.length : req.url.indexOf("?"));
