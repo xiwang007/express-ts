@@ -76,18 +76,7 @@ export const init = (app: Express): void => {
         }
     })
 
-    // 拦截访问index.html请求
-    app.use(function (req: Request, res, next) {
-        const url = req.url.slice(0, req.url.indexOf("?") == -1 ? req.url.length : req.url.indexOf("?"))
-        if (url === "/" || url === "/index.html") {
-            if (req.userid != -1) {
-                return next()
-            }
-            return res.redirect("/login.html")
-        } else {
-            next()
-        }
-    })
+
 
 
     // 处理解密token的中间件
@@ -108,6 +97,19 @@ export const init = (app: Express): void => {
                 req.userid = decoded.userid
                 next()
             })
+    })
+
+    // 拦截访问index.html请求
+    app.use(function (req: Request, res, next) {
+        const url = req.url.slice(0, req.url.indexOf("?") == -1 ? req.url.length : req.url.indexOf("?"))
+        if (url === "/" || url === "/index.html") {
+            if (req.userid != -1) {
+                return next()
+            }
+            return res.redirect("/login.html")
+        } else {
+            next()
+        }
     })
 
     // 静态文件注册
