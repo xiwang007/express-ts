@@ -23,7 +23,7 @@ export const init = (app: Express): void => {
         // 这边可以根据请求的 host 处理
         console.log(req.headers.host, req.method, req.url)
         // 这边简单 把 127.0.0.1 给限制访问了 实际可以是线上服务器的IP
-        if (req.headers.host.indexOf("127.0.0.1") == 0 && req.url != "/404") {
+        if (req.headers.host.indexOf("127.0.0.1") == 0 && (req.url != "/404" && req.url != "/images/404/404.jpg")) {
             return res.redirect("/404")
         }
         next()
