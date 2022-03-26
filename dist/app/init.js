@@ -77,20 +77,32 @@ const init = (app) => {
     app.use(express_1.default.json());
     // 打印 每个请求
     app.use(function (req, res, next) {
-        console.log(req.url);
+        console.log(req.method, req.url);
         next();
     });
     // 拦截访问less请求
     app.use(function (req, res, next) {
-        if (req.url.startsWith("/css/") && req.url.endsWith(".less")) {
+        const url = req.url.slice(0, req.url.indexOf("?") == -1 ? req.url.length : req.url.indexOf("?"));
+        if (url.startsWith("/css/") && url.endsWith(".less")) {
             res.redirect("/404");
         }
         else {
             next();
         }
     });
-    // 静态文件注册
-    app.use(express_1.default.static(common.GetPath("/public")));
+    // 拦截访问index.html请求
+    app.use(function (req, res, next) {
+        const url = req.url.slice(0, req.url.indexOf("?") == -1 ? req.url.length : req.url.indexOf("?"));
+        if (url === "/" || url === "/index.html") {
+            if (req.userid != -1) {
+                return next();
+            }
+            return res.redirect("/login.html");
+        }
+        else {
+            next();
+        }
+    });
     // 处理解密token的中间件
     app.use(function (req, res, next) {
         req.userid = -1;
@@ -112,6 +124,8 @@ const init = (app) => {
             next();
         });
     });
+    // 静态文件注册
+    app.use(express_1.default.static(common.GetPath("/public")));
 };
 exports.init = init;
 //# sourceMappingURL=init.js.map

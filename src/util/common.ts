@@ -4,6 +4,7 @@ import fs from "fs"
 import mysql from "mysql"
 import { MysqlError, FieldInfo } from "mysql"
 import nodemailer from "nodemailer"
+import request_ from "request"
 
 
 /**
@@ -51,7 +52,7 @@ export const Log = (get?: boolean): boolean => {
 }
 
 /**
- * 判断数据类型
+ * 判断数据类型 Object Array Function String Boolean Null Undefined
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const checkedType = function (target: any) {
@@ -80,7 +81,7 @@ export const sendEmail = function (aliasName: string, to: string, subject: strin
     // npm i @types/nodemailer --save-dev
     // let nodemailer=require("nodemailer")
     // import nodemailer from "nodemailer"
-    
+
     const options = {
         //QQ邮箱发件服务器是smtp.qq.com，企业邮箱是：smtp.exmail.qq.com
         host: "smtp.qq.com",
@@ -107,18 +108,11 @@ export const sendEmail = function (aliasName: string, to: string, subject: strin
 }
 
 /**
- * Path 为项目根目录后面的目录
- * 返回绝对路径
+ * 数据库 host 线上的 production
  */
-export const GetPath = (Path: string): string => {
-    return path.join(rootPath, Path)
-}
-
-/**
- * 数据库 host
- */
-export const host = {
+export const host: { [key: string]: any } = {
     host: "localhost",
+    port: 3306,
     user: "root",
     password: "zf2JkTbwAm@N5zZ",
     database: "test",
@@ -126,6 +120,30 @@ export const host = {
     // charset:"utf8mb4_unicode_ci",
     charset: "utf8mb4",
 }
+
+/**
+ * 数据库host 开发时用的本地数据库 dev
+ */
+export const host2: { [key: string]: any } = {
+    host: "localhost",
+    port: 3306,
+    user: "root",
+    password: "zf2JkTbwAm@N5zZ",
+    database: "test",
+    // charset:"UTF8MB4_GENERAL_CI",
+    // charset:"utf8mb4_unicode_ci",
+    charset: "utf8mb4",
+}
+
+// 这边根据环境 选择数据库
+if (!process.env.NODE_ENV || process.env.NODE_ENV != "production") {
+    for (const key in host) {
+        host[key] = host2[key]
+    }
+    console.log(host)
+}
+
+
 
 /**
  * Mysql函数
@@ -152,6 +170,14 @@ export const Mysql = function (sql: string, callback: (err: MysqlError | null, r
 
 
 // web ===============================================================
+
+/**
+ * Path 为项目根目录后面的目录
+ * 返回绝对路径
+ */
+ export const GetPath = (Path: string): string => {
+    return path.join(rootPath, Path)
+}
 
 /**
  * 私钥
@@ -198,4 +224,87 @@ export const GetPublic = (): string => {
         console.log("获取公钥失败 err=", err)
     }
     return publicKye = temp
+}
+
+
+/**
+ * 删除文件 文件全路径
+ */
+export const DeleteFile = (path: string): Promise<unknown> => {
+    return new Promise((resolve, reject) => {
+        fs.unlink(path, (err) => {
+            if (err) return reject(err)
+            resolve(undefined)
+        })
+    })
+}
+
+
+/**
+ * 用于停止失败的Promise
+ */
+export const PromiseStop = (): Promise<unknown> => {
+    //失败则停止执行后面的
+    return new Promise(() => { return 1 })
+}
+
+/**
+ * 用于传递失败的Promise
+ */
+export const PromiseReject = (data: any): Promise<unknown> => {
+    return new Promise((resolve, reject) => { reject(data) })
+}
+
+/**
+ * 用于传递成功的Promise
+ */
+export const PromiseResolve = (data: any): Promise<unknown> => {
+    return new Promise((resolve, reject) => { resolve(data) })
+}
+
+/**
+ * 一个简单封装了的request请求
+ */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const request = function (options: any) {
+    return new Promise((resolve, reject) => {
+        // const options = {
+        //     method: "GET",// GET POST
+        //     url: "https://www.baidu.com/",
+        //     isJson_: true,
+        //     headers: { "content-type": "application/x-www-form-urlencoded" },
+        //     // post 参数
+        //     form: { demo: "example" },
+        //     // get的参数
+        //     qs: { demo: "example" },
+        // }
+        if (checkedType(options) != "Object" || checkedType(options.url) != "String" || checkedType(options.method) != "String") {
+            reject("参数异常!")
+            return
+        }
+        if (options.method != "GET" && options.method != "POST") {
+            reject("请求方法异常!!")
+            return
+        }
+
+        request_(options, function (error: any, response: any, body: any) {
+            if (error) {
+                console.log(options.url + " 请求发生错误! error =", error)
+                return reject()
+            }
+            if (checkedType(options.isJson_) == "Boolean" && options.isJson_) {
+                let data
+                try {
+                    data = JSON.parse(body)
+                } catch {
+                    console.log(options.url + "json解析错误了! body =", body)
+                    return resolve(body)
+                }
+                resolve(data)
+            } else {
+                resolve(body)
+            }
+
+        })
+    })
 }

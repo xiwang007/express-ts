@@ -3,12 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetPublic = exports.GetPrivate = exports.Mysql = exports.host = exports.GetPath = exports.sendEmail = exports.checkedType = exports.Log = exports.rootPath = exports.hh = exports.Nowtime = void 0;
+exports.request = exports.PromiseResolve = exports.PromiseReject = exports.PromiseStop = exports.DeleteFile = exports.GetPublic = exports.GetPrivate = exports.GetPath = exports.Mysql = exports.host2 = exports.host = exports.sendEmail = exports.checkedType = exports.Log = exports.rootPath = exports.hh = exports.Nowtime = void 0;
 const os_1 = __importDefault(require("os"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const mysql_1 = __importDefault(require("mysql"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
+const request_1 = __importDefault(require("request"));
 /**
  * 获取现在时间的字符串
  */
@@ -52,7 +53,7 @@ const Log = (get) => {
 };
 exports.Log = Log;
 /**
- * 判断数据类型
+ * 判断数据类型 Object Array Function String Boolean Null Undefined
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const checkedType = function (target) {
@@ -104,18 +105,11 @@ const sendEmail = function (aliasName, to, subject, msg, callback = null) {
 };
 exports.sendEmail = sendEmail;
 /**
- * Path 为项目根目录后面的目录
- * 返回绝对路径
- */
-const GetPath = (Path) => {
-    return path_1.default.join(exports.rootPath, Path);
-};
-exports.GetPath = GetPath;
-/**
- * 数据库 host
+ * 数据库 host 线上的 production
  */
 exports.host = {
     host: "localhost",
+    port: 3306,
     user: "root",
     password: "zf2JkTbwAm@N5zZ",
     database: "test",
@@ -123,6 +117,26 @@ exports.host = {
     // charset:"utf8mb4_unicode_ci",
     charset: "utf8mb4",
 };
+/**
+ * 数据库host 开发时用的本地数据库 dev
+ */
+exports.host2 = {
+    host: "localhost",
+    port: 3306,
+    user: "root",
+    password: "zf2JkTbwAm@N5zZ",
+    database: "test",
+    // charset:"UTF8MB4_GENERAL_CI",
+    // charset:"utf8mb4_unicode_ci",
+    charset: "utf8mb4",
+};
+// 这边根据环境 选择数据库
+if (!process.env.NODE_ENV || process.env.NODE_ENV != "production") {
+    for (const key in exports.host) {
+        exports.host[key] = exports.host2[key];
+    }
+    console.log(exports.host);
+}
 /**
  * Mysql函数
  * 这边是使用示范
@@ -147,6 +161,14 @@ const Mysql = function (sql, callback, add = null) {
 };
 exports.Mysql = Mysql;
 // web ===============================================================
+/**
+ * Path 为项目根目录后面的目录
+ * 返回绝对路径
+ */
+const GetPath = (Path) => {
+    return path_1.default.join(exports.rootPath, Path);
+};
+exports.GetPath = GetPath;
 /**
  * 私钥
  */
@@ -195,4 +217,86 @@ const GetPublic = () => {
     return publicKye = temp;
 };
 exports.GetPublic = GetPublic;
+/**
+ * 删除文件 文件全路径
+ */
+const DeleteFile = (path) => {
+    return new Promise((resolve, reject) => {
+        fs_1.default.unlink(path, (err) => {
+            if (err)
+                return reject(err);
+            resolve(undefined);
+        });
+    });
+};
+exports.DeleteFile = DeleteFile;
+/**
+ * 用于停止失败的Promise
+ */
+const PromiseStop = () => {
+    //失败则停止执行后面的
+    return new Promise(() => { return 1; });
+};
+exports.PromiseStop = PromiseStop;
+/**
+ * 用于传递失败的Promise
+ */
+const PromiseReject = (data) => {
+    return new Promise((resolve, reject) => { reject(data); });
+};
+exports.PromiseReject = PromiseReject;
+/**
+ * 用于传递成功的Promise
+ */
+const PromiseResolve = (data) => {
+    return new Promise((resolve, reject) => { resolve(data); });
+};
+exports.PromiseResolve = PromiseResolve;
+/**
+ * 一个简单封装了的request请求
+ */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+const request = function (options) {
+    return new Promise((resolve, reject) => {
+        // const options = {
+        //     method: "GET",// GET POST
+        //     url: "https://www.baidu.com/",
+        //     isJson_: true,
+        //     headers: { "content-type": "application/x-www-form-urlencoded" },
+        //     // post 参数
+        //     form: { demo: "example" },
+        //     // get的参数
+        //     qs: { demo: "example" },
+        // }
+        if (exports.checkedType(options) != "Object" || exports.checkedType(options.url) != "String" || exports.checkedType(options.method) != "String") {
+            reject("参数异常!");
+            return;
+        }
+        if (options.method != "GET" && options.method != "POST") {
+            reject("请求方法异常!!");
+            return;
+        }
+        request_1.default(options, function (error, response, body) {
+            if (error) {
+                console.log(options.url + " 请求发生错误! error =", error);
+                return reject();
+            }
+            if (exports.checkedType(options.isJson_) == "Boolean" && options.isJson_) {
+                let data;
+                try {
+                    data = JSON.parse(body);
+                }
+                catch (_a) {
+                    console.log(options.url + "json解析错误了! body =", body);
+                    return resolve(body);
+                }
+                resolve(data);
+            }
+            else {
+                resolve(body);
+            }
+        });
+    });
+};
+exports.request = request;
 //# sourceMappingURL=common.js.map

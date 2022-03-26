@@ -39,16 +39,21 @@ const port = 8080;
 const app = express_1.default();
 init_1.init(app);
 // router
-app.get("/", (req, res) => res.redirect("/test"));
+// app.get("/",(req,res)=>res.redirect("/test"))
 app.get("/test", index.test);
 app.get("/404", (req, res) => res.render("webPage/404/404.pug"));
 //api
-app.get("/api", api.test);
-app.get("/api/login", api.login);
-app.get("/api/mysql", api.mysql);
+// 登录
+app.post("/api/login", api.login);
+// 判断用户是否已经登录
+app.post("/api/islogin", api.islogin);
+// 退出登录
+app.post("/api/signOut", api.signOut);
+// 获取站点配置
+app.post("/api/websiteConfig", api.websiteConfig);
 // 剩下的没有匹配都转到404页面
 app.use((req, res) => res.redirect("/404"));
 app.listen(port, function () {
-    console.log(`app is running ... at port=${port}`);
+    console.log(`app is running ... at port=${port} env=${process.env.NODE_ENV || "development"}`);
 });
 //# sourceMappingURL=app.js.map

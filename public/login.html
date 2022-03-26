@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=0">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="/css/element-ui-2.15.6-theme-chalk.css">
+    <link rel="stylesheet" href="/css/website.css">
+    <title>网站标题</title>
+</head>
+<script>
+    (function (parameter) {
+        // if (window.location.pathname == "/") {
+        //     let url = btoa(+new Date() * 100);
+        //     window.location.href = `${window.location.origin}/${url}?t=${+new Date()}`
+        //     return;
+        // }
+        // 防止游览器缓存
+        if (!parameter) parameter = "t"
+        let search = window.location.search
+        // console.log(window.location);
+        search = search.replace('?', '')
+        search = search.split('&')
+        let hasT = false
+        let t = null
+        let get = ""
+        search.forEach(function (val) {
+            if (val == "") return
+            if (val.indexOf(`${parameter}=`) != '-1') {
+                // console.log("val=",val);
+                hasT = true
+                t = val.replace(`${parameter}=`, '')
+            } else {
+                get = get + "&" + val
+            }
+        })
+        if (hasT) {
+            t = parseInt(t) + ""
+            if (t == "NaN") {
+
+                window.location.href = window.location.origin + window.location.pathname + "?" + `${parameter}=` + (+new Date()) + get
+            } else {
+                // 用于 刷新
+                let now = +new Date()
+                if (t > now || now - t > 600000) {//600000
+                    window.location.href = window.location.origin + window.location.pathname + "?" + `${parameter}=` + (+new Date()) + get
+                }
+            }
+        } else {
+            window.location.href = window.location.origin + window.location.pathname + "?" + `${parameter}=` + (+new Date()) + get
+        }
+
+    })()
+</script>
+
+<script>
+        (function () {
+            //判断当前的浏览器是微信浏览器还是web端浏览器 然后进行不同的操作
+            let ua = navigator.userAgent.toLowerCase();
+            let isWeixin = ua.indexOf('micromessenger') != -1;
+            if (ua.indexOf("android") > 0) {
+                //安卓
+                // console.log("安卓");
+                // window.location.href = "https://www.baidu.com/"
+            } else {
+                //苹果
+                // console.log("苹果");
+            }
+        }())
+</script>
+
+
+
+<body>
+    <div id="app">
+        <div v-if="!login">
+            <div class="login-title">{{websiteConfig.websiteName}}</div>
+            <el-form label-position="top" label-width="80px" :model="userinfo">
+                <el-form-item label="账号">
+                    <el-input v-model="userinfo.name"></el-input>
+                </el-form-item>
+                <el-form-item label="密码">
+                    <el-input v-model="userinfo.pwd" type="password" :show-password="true"></el-input>
+                </el-form-item>
+                <el-button style="width: 100%;" type="primary" @click="LoginButton">登录</el-button>
+            </el-form>
+
+        </div>
+        <div v-if="login">
+        </div>
+        <div class="ba">
+            <a href="http://beian.miit.gov.cn/" target="_blank">{{websiteConfig.websiteBA}}</a>
+        </div>
+
+
+    </div>
+    <!-- app end -->
+</body>
+<!-- import Vue before Element -->
+<script src="/js/vue.js"></script>
+<!-- import JavaScript -->
+<script src="/js/element-ui-index.js"></script>
+<script src="/js/axios.min.js"></script>
+<script src="/js/jquery-v3.3.1.min.js"></script>
+<script>
+        (function () {
+            new Vue({
+                el: '#app',
+                data: function () {
+                    return {
+                        userinfo: { name: "", pwd: "" },// 登录的信息
+                        login: true,// 用于判断是否登录
+                        websiteConfig: { websiteName: "网站标题", websiteBA: "京ICP证000000号(自行修改)" }
+                    }
+                },
+                // 生命周期 - 创建完成（可以访问当前this实例）
+                created() {
+                    this.init()
+                },
+                // 生命周期 - 挂载完成（可以访问DOM元素）
+                mounted() {
+
+                },
+                watch: {
+                    websiteConfig() {
+                        document.getElementsByTagName("title")[0].innerText = this.websiteConfig.websiteName
+                    },
+                },
+                methods: {
+                    init() {
+                        // 判断是否登录了
+                        this.isLogin()
+                        // 获取站点配置
+                        this.GetWebsiteConfig()
+                    },
+                    // 获取是否登录
+                    isLogin() {
+                        axios.post("/api/islogin").then(a => {
+                            if (a.data.state == 1) {
+                                this.login = true
+                                window.location.href = window.location.origin + "/"
+                            } else {
+                                // this.$message.error("请稍后重试!");
+                                this.login = false
+                                // window.location.href = window.location.origin + "/login.html"
+                            }
+                        })
+                    },
+                    // 登录按钮处理函数
+                    LoginButton() {
+                        axios.post("/api/login", { name: this.userinfo.name, password: this.userinfo.pwd }).then(a => {
+                            if (a.data.state == 1) {
+                                this.login = true
+                                window.location.href = window.location.origin + "/"
+                            } else {
+                                this.$message.error(a.data.msg || "登录失败!");
+                                this.login = false
+                            }
+                        })
+                    },
+                    // 获取站点配置
+                    GetWebsiteConfig() {
+                        axios.post('/api/websiteConfig', { website: window.location.hostname })
+                            .then(a => {
+                                if (a.data.state == 1) {
+                                    // 说明获取到配置信息来
+                                    this.websiteConfig = a.data.data
+                                } else {
+                                    this.$message.error(a.data.msg || "获取站点配置失败!");
+                                }
+                            })
+                    },
+
+                },// methods end
+
+            })// vue end
+        })()
+
+</script>
+
+
+</html>

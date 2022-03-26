@@ -1,0 +1,34 @@
+@charset "UTF-8";
+
+
+//---------------------------
+//变量
+//rem适配方案不好维护  设备会更新  设计稿尺寸  预设基准值
+//适配主流设备十几种
+@adapterDeviceList:1024px,768px,750px,720px,640px,540px,480px,424px,414px,400px,384px,375px,360px,320px;
+//设计稿尺寸
+@psdWidth:375px;
+//预设基准值
+@baseFontSize:16px;
+//设备的种类
+@len:length(@adapterDeviceList);
+
+
+//遍历使用的是for循环
+//less没有循环语法
+//使用函数的迭代 死循环
+//根据数组的长度去停止当前循环
+//给函数的执行附加条件
+//需要序号来判断  通过序号遍历 @index 1 开始
+//遍历成功
+.adapterMixin(@index) when ( @index > 0){
+    @media (min-width: extract(@adapterDeviceList,@index)){
+      html{
+        font-size: @baseFontSize / @psdWidth * extract(@adapterDeviceList,@index);
+      }
+    }
+    .adapterMixin( @index - 1);
+}
+
+//-----------------------------------------
+.adapterMixin(@len);

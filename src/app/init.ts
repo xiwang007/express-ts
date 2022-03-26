@@ -1,4 +1,4 @@
-import {Express} from "express"
+import { Express } from "express"
 import express from "express"
 import { Request, Response, NextFunction } from "express"
 import session from "express-session"
@@ -15,7 +15,7 @@ import jwt from "jsonwebtoken"
  * 设置 拦截请求处理
  * 注册静态文件
  */
-export const init = (app:Express): void => {
+export const init = (app: Express): void => {
     // 加载 token 所需要的公钥和私钥
     common.GetPrivate()
     common.GetPublic()
@@ -43,7 +43,7 @@ export const init = (app:Express): void => {
     // Path： 表示 在那个路由下可以访问到cookie。
     // httpOnly：是微软对 COOKIE 做的扩展。如果在 COOKIE 中设置了“httpOnly”属性，则通过程序（JS 脚本、applet 等）将无法读取到COOKIE 信息，防止 XSS 攻击的产生 。
     // singed：表示是否签名cookie, 设为true 会对这个 cookie 签名，这样就需要用 res.signedCookies 而不是 res.cookies 访问它。被篡改的签名 cookie 会被服务器拒绝，并且 cookie 值会重置为它的原始值。
-    
+
     // 设置 cookie
     app.use(cookieParser())
     // 获取
@@ -54,47 +54,63 @@ export const init = (app:Express): void => {
     // res.clearCookie("token");
     // 扩展 https://www.cnblogs.com/hyddd/archive/2009/04/09/1432744.html
     // 如果有什么敏感操作建议 使用文章 五.CSRF的防御 进行处理 一般站点无敏感操作这样就可以了 如文章失效百度 CSRF 即可
-    
-    
+
+
     // 设置解析req的body
     app.use(express.urlencoded({ extended: false }))
     app.use(express.json())
-    
+
     // 打印 每个请求
-    app.use(function(req,res,next){
-        console.log(req.url)
+    app.use(function (req, res, next) {
+        console.log(req.method, req.url)
         next()
     })
 
     // 拦截访问less请求
-    app.use(function(req,res,next){
-        if(req.url.startsWith("/css/")&&req.url.endsWith(".less")){
+    app.use(function (req, res, next) {
+        const url = req.url.slice(0, req.url.indexOf("?") == -1 ? req.url.length : req.url.indexOf("?"))
+        if (url.startsWith("/css/") && url.endsWith(".less")) {
             res.redirect("/404")
-        }else{
+        } else {
             next()
         }
     })
-    // 静态文件注册
-    app.use(express.static(common.GetPath("/public")))
+
+    // 拦截访问index.html请求
+    app.use(function (req: Request, res, next) {
+        const url = req.url.slice(0, req.url.indexOf("?") == -1 ? req.url.length : req.url.indexOf("?"))
+        if (url === "/" || url === "/index.html") {
+            if (req.userid != -1) {
+                return next()
+            }
+            return res.redirect("/login.html")
+        } else {
+            next()
+        }
+    })
+
 
     // 处理解密token的中间件
-    app.use(function(req:Request,res:Response,next:NextFunction){
-        req.userid=-1
-        if(!req.cookies.token)return next()
-        const privateKey=common.GetPrivate()
+    app.use(function (req: Request, res: Response, next: NextFunction) {
+        req.userid = -1
+        if (!req.cookies.token) return next()
+        const privateKey = common.GetPrivate()
         // 解密
-        jwt.verify(req.cookies.token,privateKey,
+        jwt.verify(req.cookies.token, privateKey,
             //   {
             //   // algorithms:'RS256'
             // },
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            function(err: any,decoded: { userid: number; }){
-              if(err) return next()
-              if(!decoded.userid) return next()
-              req.userid=decoded.userid
-              next()
-        })
+            function (err: any, decoded: { userid: number; }) {
+                if (err) return next()
+                if (!decoded.userid) return next()
+                req.userid = decoded.userid
+                next()
+            })
     })
+
+    // 静态文件注册
+    app.use(express.static(common.GetPath("/public")))
 
 }

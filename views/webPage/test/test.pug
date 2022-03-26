@@ -6,7 +6,14 @@ html(lang="en")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title= locals.title
     link(rel="icon" href="favicon.ico")
-    link(rel="stylesheet" href="/css/styles.css")
+    //- link(rel="stylesheet" href="/css/styles.css")
+    style.
+      body{
+        max-width: 870px;
+        margin: auto;
+        padding-left: 32px;
+        padding-right: 32px;
+      }
     link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css")
     link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css")
   body.markdown-body
@@ -15,7 +22,7 @@ html(lang="en")
     - for (var x = 0; x < 3; x++)
         li item #{x}
 
-    script(src='/js/test.js')
+    //- script(src='/js/test.js')
     script.
       var usingPug=true;
       if (usingPug){

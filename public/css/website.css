@@ -1,0 +1,24 @@
+#app {
+  max-width: 600px;
+  margin: auto;
+}
+.login-title {
+  font-size: 20px;
+  text-align: center;
+  font-weight: 700;
+  padding: 20px 0 20px 0;
+}
+.ba {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 25px;
+  text-align: center;
+}
+.ba > a {
+  color: #333;
+  text-decoration: none;
+  line-height: 30px;
+  font-weight: 300;
+  font-size: 14px;
+}
