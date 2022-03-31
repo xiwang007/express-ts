@@ -3,13 +3,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.request = exports.PromiseResolve = exports.PromiseReject = exports.PromiseStop = exports.DeleteFile = exports.GetPublic = exports.GetPrivate = exports.GetPath = exports.Mysql = exports.host2 = exports.host = exports.sendEmail = exports.checkedType = exports.Log = exports.rootPath = exports.hh = exports.Nowtime = void 0;
+exports.request = exports.PromiseResolve = exports.PromiseReject = exports.PromiseStop = exports.DeleteFile = exports.GetPublic = exports.GetPrivate = exports.GetPath = exports.Mysql = exports.host2 = exports.host = exports.sendEmail = exports.checkedType = exports.Log = exports.rootPath = exports.hh = exports.Nowtime = exports.EnvProduction = void 0;
 const os_1 = __importDefault(require("os"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const mysql_1 = __importDefault(require("mysql"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const request_1 = __importDefault(require("request"));
+/**
+* 当前环境是否是线上
+*/
+exports.EnvProduction = false; // development 开发 production 线上
+if (!process.env.NODE_ENV || process.env.NODE_ENV != "production") {
+    exports.EnvProduction = false;
+}
+else {
+    exports.EnvProduction = true;
+}
 /**
  * 获取现在时间的字符串
  */
@@ -131,7 +141,7 @@ exports.host2 = {
     charset: "utf8mb4",
 };
 // 这边根据环境 选择数据库
-if (!process.env.NODE_ENV || process.env.NODE_ENV != "production") {
+if (!exports.EnvProduction) {
     for (const key in exports.host) {
         exports.host[key] = exports.host2[key];
     }

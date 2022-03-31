@@ -6,6 +6,16 @@ import { MysqlError, FieldInfo } from "mysql"
 import nodemailer from "nodemailer"
 import request_ from "request"
 
+/**
+* 当前环境是否是线上
+*/
+export let EnvProduction = false // development 开发 production 线上
+
+if (!process.env.NODE_ENV || process.env.NODE_ENV != "production") {
+    EnvProduction = false
+} else {
+    EnvProduction = true
+}
 
 /**
  * 获取现在时间的字符串
@@ -136,7 +146,7 @@ export const host2: { [key: string]: any } = {
 }
 
 // 这边根据环境 选择数据库
-if (!process.env.NODE_ENV || process.env.NODE_ENV != "production") {
+if (!EnvProduction) {
     for (const key in host) {
         host[key] = host2[key]
     }
