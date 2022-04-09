@@ -166,7 +166,11 @@
                             .then(a => {
                                 if (a.data.state == 1) {
                                     // 说明获取到配置信息来
-                                    this.websiteConfig = a.data.data
+                                    if (typeof a.data.data == "string") {
+                                        this.websiteConfig = JSON.parse(a.data.data)
+                                    } else {
+                                        this.websiteConfig = a.data.data
+                                    }
                                 } else {
                                     this.$message.error(a.data.msg || "获取站点配置失败!");
                                 }
